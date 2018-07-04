@@ -1,0 +1,113 @@
+#####################################
+Mattia Corradi - Dalla Chiara Michele
+#####################################
+
+.model FSM
+
+.inputs RES_GEN RES_WM RES_DW OL CICLO6 CICLO5 CICLO4
+.outputs INT_GEN INT_WM INT_DW
+.start_kiss
+.i 7     #n inputs
+.o 3     #n outputs 
+.p 49    #n transizioni 
+.s 11     #n stati 
+.r A  #stato di reset 
+
+# INDICAZIONE DEGLI STATI
+# A = 'La macchina e' spenta'
+# B = 'La macchina e' accesa e non si trova in OL con int-dw=1 e int-wm=1'
+# C = 'La macchina si trova in OL fino al 3 controllo'
+# D = 'La macchina si trova in OL ed e' al 4 controllo; spengo la DW'
+# E = 'La macchina si trova in OL ed e' al 5 controllo; spengo la WM'
+# F = 'La macchina si trova con int-dw=0'
+# G = 'La macchina si trova con int-wm=0'
+# H = 'La macchina si trova con int-dw=0 e int-wm=0'
+# I = 'La macchina si trova in OL con int-dw=0'
+# L = 'La macchina si trova in OL con int-wm=0'
+# M = 'La macchina si trova in OL con int-dw=0 e int-wm=0'
+
+# (inputs, stato_corrente, stato_prossimo, output)
+
+# ----------------- A -----------------
+0------ A A 000
+1--0--- A B 111
+1--1--- A C 111
+
+# ----------------- B -----------------
+---0--- B B 111
+---1000 B C 111
+
+# ----------------- C -----------------
+---0000 C B 111
+---1000 C C 111
+---1001 C D 110
+
+# ----------------- D -----------------
+--1001- D B 111
+--0101- D E 100
+--0001- D F 110
+--1101- D L 101
+
+# ----------------- E -----------------
+---11-- E A 000
+---01-- E H 100
+-010000 E G 101
+-100000 E F 110
+-110000 E B 111
+
+# ----------------- F -----------------
+--10--- F B 111
+--11--- F C 111
+--00--- F F 110
+--01--0 F I 110
+
+# ----------------- G -----------------
+-1-0--- G B 111
+-111--- G C 111
+-0-0--- G G 101
+-0-1--- G L 101
+
+# ----------------- H -----------------
+-110--- H B 111
+-111--- H C 111
+-100--- H F 110
+-010--- H G 101
+-000--- H H 100
+-101--- H I 110
+-011--- H L 101
+-001--- H M 100
+
+# ----------------- I -----------------
+--10--- I B 111
+--11-00 I C 111
+--11-01 I D 110
+--11-1- I E 100
+--00--- I F 110
+--01-0- I I 110
+--01-1- I M 100
+
+# ----------------- L -----------------
+
+---11-- L A 000
+-1-0000 L B 111
+-1-1000 L C 111
+-1-1001 L D 110
+---1010 L E 100
+-0-00-- L G 101
+-0-1000 L L 101
+-0-1001 L L 101
+
+# ----------------- M -----------------
+---11-- M A 000
+-110--- M B 111
+-100--- M F 110
+-010--- M G 101
+-000--- M H 100
+-10100- M I 110
+-011000 M L 101
+-0010-- M M 100
+-011001 M M 100
+-1-101- M M 100
+
+.end_kiss
+.end
