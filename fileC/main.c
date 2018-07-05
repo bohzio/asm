@@ -9,7 +9,7 @@
 short int const loads[] = {2000, 300, 1200, 1000, 2000, 1800, 240, 400, 200, 400};
 
 int res_gen = 0, res_wm = 0, res_dw = 0, int_gen = 0, int_wm= 0, int_dw = 0;
-int count = 0; // <-- contatore ciclo (incrementando indica anche che sono ancora in OL)
+int count = 1; // <-- contatore ciclo (incrementando indica anche che sono ancora in OL)
 int stato = 0; // A = 0, B = 1, C = 2, ..., M = 10
 int th;
 
@@ -34,9 +34,8 @@ int generaFascia(const int bitStato[], int length){
 }
 
 int contatore(int count, int fascia){
-    return (fascia == 3) ? count++ : 0;
+    return (fascia == 3) ? count+=1 : 0;
 }
-
 
 
 char * readFile(int argc, char *argv[]){
@@ -82,46 +81,36 @@ int main(int argc, char *argv[]){
 
     const int n_input = 15;
 
-
-
-
     while (*bufferin != '\0'){
-
-
-        char *app = bufferin;
-        
 
         res_gen = bufferin[0] - '0';
         res_dw = bufferin[1] - '0';
         res_wm = bufferin[2] - '0';
 
-        bitStato[0] = bufferin[4] - '0';
-        bitStato[1] = bufferin[5] - '0';
-        bitStato[2] = bufferin[6] - '0';
-        bitStato[3] = bufferin[7] - '0';
-        bitStato[4] = bufferin[8] - '0';
-        bitStato[5] = bufferin[9] - '0';
-        bitStato[6] = bufferin[10] - '0';
-        bitStato[7] = bufferin[11] - '0';
-        bitStato[8] = bufferin[12] - '0';
-        bitStato[9] = bufferin[13] - '0';
+        //salto bufferin[3] che sarebbe il trattino (-)
+
+        for(int i=0; i<14;i++){
+            bitStato[i] = bufferin[i+4] - '0';
+        }
 
         th = generaFascia(bitStato,10);
 
         count = contatore(count, th);
 
         // stato A macchina spenta
-        if (stato == 0 && res_gen) {
-            stato = 1;
-            int_gen = 1;
-            int_wm = 1;
-            int_dw = 1;
+        if (stato == 0) {
+            if(res_gen) {
+                stato = 1;
+                int_gen = 1;
+                int_wm = 1;
+                int_dw = 1;
+            }
 
             // in assembly devo ritornare lo stato, int_gen, int_wm, int_dw
         }
         // C e' un particolare B si comporta simile a parte
         // B e C nell' if
-        if (stato == 1) {
+        else if (stato == 1) {
             // B NON CAMBIA NIENTE
             // if (count <= 3) i valori li setto solo se cambiano anche in assembly.
             if (count == 4) {
@@ -131,7 +120,7 @@ int main(int argc, char *argv[]){
             }
         }
         // D
-        if (stato == 2) {
+        else if (stato == 2) {
             if (count) {
                 // i valori li setto solo se cambiano anche in assembly. qui dw e' gia' 0 mentre gen = 1
                 int_wm = 0;
@@ -154,7 +143,7 @@ int main(int argc, char *argv[]){
             }
         }
         // E
-        if (stato == 3) {
+        else if (stato == 3) {
             if (count) {
                 stato = 0;
                 int_gen = 0;
@@ -184,7 +173,7 @@ int main(int argc, char *argv[]){
 
         }
         // stato F
-        if (stato == 4) {
+        else if (stato == 4) {
             // passo in I
             if (count) {
                 stato = 7;
@@ -203,7 +192,7 @@ int main(int argc, char *argv[]){
         }
 
         // stato G
-        if (stato == 5) {
+        else if (stato == 5) {
             if (count) {
                 // L
                 stato = 8;
@@ -222,7 +211,7 @@ int main(int argc, char *argv[]){
         }
 
         // stato H
-        if (stato == 6) {
+        else if (stato == 6) {
             if (count) {
                 // I
                 if (res_dw) {
@@ -234,7 +223,7 @@ int main(int argc, char *argv[]){
                     int_wm = 1;
                 }
                     // C
-                else if (res_dw & res_wm) {
+                else if (res_dw && res_wm) {
                     stato = 1;
                     int_wm = 1;
                     int_dw = 1;
@@ -243,7 +232,7 @@ int main(int argc, char *argv[]){
                 }
             } else {
                 // B
-                if (res_dw & res_wm) {
+                if (res_dw && res_wm) {
                     stato = 1;
                     int_wm = 1;
                     int_dw = 1;
@@ -261,7 +250,7 @@ int main(int argc, char *argv[]){
             }
         }
         // stato I
-        if (stato == 7) {
+        else if (stato == 7) {
             if (count) {
                 // C
                 if (res_dw && count <= 3) {
@@ -294,7 +283,7 @@ int main(int argc, char *argv[]){
             }
         }
 
-        if (stato == 8) {
+        else if (stato == 8) {
             if (count) {
                 // count == 4 stato L
                 if (count == 5) {
@@ -328,7 +317,7 @@ int main(int argc, char *argv[]){
             }
         }
         // stato M
-        if (stato == 9) {
+        else if (stato == 9) {
             if (count) {
                 // A
                 if (count == 6) {
