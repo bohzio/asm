@@ -9,7 +9,7 @@
 short int const loads[] = {2000, 300, 1200, 1000, 2000, 1800, 240, 400, 200, 400};
 
 int res_gen = 0, res_wm = 0, res_dw = 0, int_gen = 0, int_wm= 0, int_dw = 0;
-int count = 1; // <-- contatore ciclo (incrementando indica anche che sono ancora in OL)
+int count = 0; // <-- contatore ciclo (incrementando indica anche che sono ancora in OL)
 int stato = 0; // A = 0, B = 1, C = 2, ..., M = 10
 int th;
 
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]){
 
         //salto bufferin[3] che sarebbe il trattino (-)
 
-        for(int i=0; i<14;i++){
+        for(int i=0; i<10;i++){
             bitStato[i] = bufferin[i+4] - '0';
         }
 
