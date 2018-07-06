@@ -6,25 +6,25 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-short int const loads[] = {2000, 300, 1200, 1000, 2000, 1800, 240, 400, 200, 400};
+unsigned int const loads[] = {2000, 300, 1200, 1000, 2000, 1800, 240, 400, 200, 400};
 
-int res_gen = 0, res_wm = 0, res_dw = 0, int_gen = 0, int_wm= 0, int_dw = 0;
-int count = 0; // <-- contatore ciclo (incrementando indica anche che sono ancora in OL)
-int stato = 0; // A = 0, B = 1, C = 2, ..., M = 10
-int th;
+_Bool res_gen = 0, res_wm = 0, res_dw = 0, int_gen = 0, int_wm= 0, int_dw = 0;
+unsigned int count = 0; // <-- contatore ciclo (incrementando indica anche che sono ancora in OL)
+unsigned int stato = 0; // A = 0, B = 1, C = 2, ..., M = 10
+unsigned int th;
 
 enum { MAXLINES = 400 };
 enum { LIN_LEN = 15 };
 enum { LOUT_LEN = 8 };
 
-int generaFascia(int bitStato[], int length, int wm, int dw){
+unsigned int generaFascia(_Bool bitStato[],unsigned int const length, _Bool wm, _Bool dw){
 
 
-    int sum = 0;
-    int i = 0;
+    unsigned int sum = 0;
+    unsigned int i = 0;
 
-    int oldDw = bitStato[4];
-    int oldWm = bitStato[5];
+    _Bool oldDw = bitStato[4];
+    _Bool oldWm = bitStato[5];
 
     //array
     bitStato[4] = bitStato[4] && dw;
@@ -47,7 +47,7 @@ int generaFascia(int bitStato[], int length, int wm, int dw){
     return 3;
 }
 
-int contatore(int count, int fascia){
+unsigned int contatore(unsigned int count, unsigned int fascia){
     return (fascia == 3) ? count+=1 : 0;
 }
 
@@ -92,12 +92,12 @@ int main(int argc, char *argv[]){
     char *bufferin = readFile(argc,argv);
 
     //Ho bisogno di 2 array perchè uno viene modificato con genera fascia
-    int bitStato[10];
+    _Bool bitStato[10];
 
-    const int n_input = 15;
+    const unsigned int n_input = 15;
 
-    int wm_old = 0;
-    int dw_old = 0;
+    _Bool wm_old = 0;
+    _Bool dw_old = 0;
 
     while (*bufferin != '\0'){
 
@@ -115,8 +115,8 @@ int main(int argc, char *argv[]){
         }
 
 
-        int wm = res_wm || int_wm;
-        int dw = res_dw || int_dw;
+        _Bool wm = res_wm || int_wm;
+        _Bool dw = res_dw || int_dw;
 
         th = generaFascia(bitStato,10,wm,dw);
 
