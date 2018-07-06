@@ -1,0 +1,304 @@
+# -4(%ebp) corrisponde al valore dello stato, -8(%ebp) quello di int_gen, -12(%ebp) quello di int_wm e -16(%ebp) quello di int_dw. Questo perchè lo stack cresce 
+# verso indirizzi di memoria inferiori (segno meno). Gli interruttori sono le variabili della funzione, i res i parametri passati dal main in seguito alla lettura
+# del file di input (spezzato in righe). 8(%ebp) è res_gen, 20(%ebp) il contatore (che conta i cicli passati in overload), 16(%ebp) il res_dw e 12(%ebp) res_wm. %ebp è il
+# registro che punta all'inizio dell'area dello stack utilizzata dalla funzione. In posizione 4(%ebp) si trova l'indirizzo di ritorno della funzione.
+
+fsm:
+        pushl   %ebp            # salvo il puntatore all'area della funzione che chiama quella che sto per usare nello stack
+        movl    %esp, %ebp      # metto esp nell'attuale ebp per aggiornare "l'area di memoria in uso"
+        subl    $16, %esp       # decremento di 16 esp in quanto ho 4 variabili locali nella funzione (gli int + il valore dello stato)
+        cmpl    $0, -4(%ebp)    # stato
+        jne     .stato1         # se stato non è 0 allora passo ad analizzare stato1 (quindi faccio una serie di comparazioni per entrare "nell'if corretto")
+        cmpl    $0, 8(%ebp)     # res_gen (se lo stato è 0 e il res_gen ancora 0 allora gli int saranno ancora tutti spenti)
+        je      .fine           #
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -8(%ebp)    # int_gen
+        movl    $1, -12(%ebp)   # int_wm
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           #
+.stato1:
+        cmpl    $1, -4(%ebp)    # stato
+        jne     .stato2         # se stato non è 1 allora passa a comparare per stato 2
+        cmpl    $4, 20(%ebp)    # count (se il contatore non è ancora arrivato a 4 allora non si ha alcun effetto)
+        jne     .fine           #
+        movl    $2, -4(%ebp)    # stato (si passa allo stato 2)
+        movl    $0, -16(%ebp)   # int_dw (int_dw viene messo a 0)
+        jmp     .fine           #
+.stato2:
+        cmpl    $2, -4(%ebp)    # stato
+        jne     .stato3         # se stato non è 2 allora passa a comparare per stato 3
+        cmpl    $0, 20(%ebp)    # count (se il contatore è 0 significa che non sono più in OL)
+        je      .dwON           # 
+        movl    $0, -12(%ebp)   # int_wm
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .L9             #
+        movl    $8, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           #
+.L9:
+        movl    $3, -4(%ebp)    # stato
+        jmp     .fine           #
+.dwON:
+        cmpl    $0, 16(%ebp)    # res_dw (se res_dw è = 1 allora rimetto stato = 1 e riattivo l'int_dw)
+        je      .dwOFF          # ...altrimenti 
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           #
+.dwOFF:
+        cmpl    $0, 16(%ebp)    # res_dw (se red dw è = 0 allora lo stato = 4 ed esco dalla fsm)
+        jne     .fine           #
+        movl    $4, -4(%ebp)    # stato
+        jmp     .fine           #
+.stato3:
+        cmpl    $3, -4(%ebp)    # stato
+        jne     .stato4         # se stato non è 3 allora passa a comparare per stato 4
+        cmpl    $0, 20(%ebp)    # count
+        je      .rDWonrWMoff    # se il contatore è 0 allora non sono più in OL, passo a controllare se i res sono entrambi ON
+        movl    $0, -4(%ebp)    # stato
+        movl    $0, -8(%ebp)    # int_gen
+        jmp     .fine           #
+                                #quando attivo interruttori (o non attivo) diversamente da come scritto nel nome dello stato allora passo ai controlli successivi
+.rDWonrWMoff:
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .rDWoffrWMon    # ... se non ho riattivato dw
+        cmpl    $0, 12(%ebp)    # res_wm
+        jne     .rDWoffrWMon    # ... se ho riattivato wm
+        movl    $5, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw viene riattivato
+        jmp     .fine           #
+.rDWoffrWMon:
+        cmpl    $0, 12(%ebp)    # res_wm 
+        je      .rDWonrWMon     # ... se non ho riattivato wm
+        cmpl    $0, 16(%ebp)    # res_dw
+        jne     .rDWonWMon      # ... se ho riattivato dw
+        movl    $4, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        jmp     .fine           #
+.rDWonrWMon:
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .rDWoffrWMoff   # ... se non ho riattivato wm
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .rDWoffrWMoff   # ... se non ho riattivato dw
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           #
+.stato4:
+        cmpl    $4, -4(%ebp)    # stato
+        jne     .stato5         # se stato non è 4 allora passa a comparare per stato 5
+        cmpl    $0, 20(%ebp)    # count
+        je      .s4notOL        # se il conto è uguale a 0 significa che non sono più in OL quindi...
+        movl    $7, -4(%ebp)    # stato
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .fine           # se dw non è stato riattivato termino, altrimenti...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # ...riattivo dw e riporto ad 1 lo stato
+.s4notOL:
+        cmpl    $0, 16(%ebp)    # res_dw 
+        je      .fine           # se non ho riattivato dw allora termino...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # ...altrimenti riattivo dw, passo allo stato 1 e termino
+.stato5:
+        cmpl    $5, -4(%ebp)    # stato
+        jne     .stato6         # se stato non è 5 allora passa a comparare per stato 6
+        cmpl    $0, 20(%ebp)    # count
+        je      .s5notOL        # se il contatore è uguale a 0 allora non sono più in OL quindi...
+        movl    $8, -4(%ebp)    # stato
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .fine           # ... se wm non è stata riattivata termino...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        jmp     .fine           # ... altrimenti riattivo wm, torno allo stato 1 e termino
+.s5notOL:
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .fine           # ... se wm non viene riattivata termino...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        jmp     .fine           # ... altrimenti riattivo wm, torno allo stato 1 e termino
+.stato6:
+        cmpl    $6, -4(%ebp)    # stato
+        jne     .stato7         # se stato non è 6 allora passa a comparare per stato 7
+        cmpl    $0, 20(%ebp)    # count
+        je      .s6notOL        # se il contatore è 0 allora significa che non sono più in OL
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .s6DWonWMoff    # se non riattivo dw ...
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .s6DWonWMoff    # se non riattivo wm ...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # metto lo stato a 1, riattivo dw e wm prima di terminare
+.s6DWonWMoff:
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .s6DWoffWMon    # se non riattivo dw ...
+        movl    $7, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # riattivo dw e porto lo stato ad 7 prima di terminare
+.s6DWoffWMon:
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .s6DWoffWMoff   # se wm non viene riattivato
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        jmp     .fine           # riattivo wm, metto lo stato a 8 e termino
+.s6DWoffWMoff:
+        movl    $9, -4(%ebp)    # stato
+        jmp     .fine           # metto lo stato a 9 e termino
+.s6notOL:
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .s6DWoffWMonNol # se dw non viene riattivato ...
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .s6DWoffWMonNol # se wm non viene riattivato ...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # ... altrimenti riattivo sia wm che dw e metto lo stato a 1
+.s6DWoffWMonNol:
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .s6DWoffWmoffNol# se neanche wm è stato riattivato ...
+        movl    $4, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        jmp     .fine           # riattivo wm, porto lo stato a 4 e termino
+.s6DWoffWmoffNol:
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .fine           # se anche dw non viene riattivato termino subito
+        movl    $5, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # ... altrimenti metto lo stato a 5, riattivo dw e termino
+.stato7:
+        cmpl    $7, -4(%ebp)    # stato
+        jne     .stato8         # se stato non è 7 allora passa a comparare stato 8
+        cmpl    $0, 20(%ebp)    # count
+        je      .s7notOL        # se il contatore è 0 non sono in OL quindi ...
+        cmpl    $0, 16(%ebp)    # res_dw <-- da qui sono in OL
+        je      .morethan3      # se dw non viene riattivato ...
+        cmpl    $3, 20(%ebp)    # count
+        jg      .morethan3      # se il contatore ha raggiunto un valore superiore al 3 ...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # ... altrimenti riporto lo stato a 1, riattivo dw e termino
+.morethan3:
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .cont4          # se dw non è stato riattivato ...
+        cmpl    $4, 20(%ebp)    # count
+        jne     .cont4          # se il contatore non ha valore 4...
+        movl    $2, -4(%ebp)    # stato
+        jmp     .fine           # se il contatore è uguale a 4 metto lo stato a 2
+.cont4:
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .cont5          # se dw è stato riattivato ...
+        cmpl    $5, 20(%ebp)    # count
+        jne     .cont5          # se il contatore non è = a 5 ...
+        movl    $2, -4(%ebp)    # stato
+        jmp     .fine           # se il contatore è uguale a 5 imposto lo stato a 2.
+.cont5:
+        cmpl    $5, 20(%ebp)    # count
+        jne     .fine           # se il contatore non vale 5 termino
+        movl    $9, -4(%ebp)    # stato
+        movl    $0, -12(%ebp)   # int_wm
+        jmp     .fine           # altrimenti imposto wm a 0, lo stato a 9 e termino
+.s7notOL:
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .s7NresNol      # se dw non viene riattivata ...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # ... altrimenti metto stato = 1 e dw a 1 e termino
+.s7NresNol:
+        movl    $4, -4(%ebp)    # stato
+        jmp     .fine           # ... metto lo stato a 4 e termino
+.stato8:
+        cmpl    $8, -4(%ebp)    # stato
+        jne     .stato9         # se stato non è 8 allora passa a comparare stato 9
+        cmpl    $0, 20(%ebp)    # count
+        je      .s8notOL        # se il contatore vale 0 allora non sono in OL ...
+        cmpl    $5, 20(%ebp)    # count
+        jne     .s8cont5        # se il contatore non vale 5 ...
+        movl    $3, -4(%ebp)    # stato
+        jmp     .fine           # ... altrimenti metto lo stato a 3 e termino
+.s8cont5:
+        cmpl    $6, 20(%ebp)    # count
+        jne     .s8cont6        # se il contatore non vale 6 ...
+        movl    $0, -4(%ebp)    # stato
+        movl    $0, -8(%ebp)    # int_gen
+        movl    $0, -16(%ebp)   # int_dw
+        jmp     .fine           # ...altrimenti spengo il sistema
+.s8cont6:
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .s8lastcheck    # se wm non viene riattivato ...
+        cmpl    $3, 20(%ebp)    # count
+        jg      .s8lastcheck    # se il contatore vale più di 3 ...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        jmp     .fine           # ... altrimenti metto lo stato a 1 e wm a 1
+.s8lastcheck:
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .fine           # se wm vale 0 termino
+        cmpl    $4, 20(%ebp)    # count
+        jne     .fine           # se il conto vale 4 termino
+        movl    $2, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        movl    $0, -16(%ebp)   # int_dw
+        jmp     .fine           # altrimenti metto lo stato a 4, attivo wm e spengo dw. Dopodichè termino
+.s8notOL:
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .s8NolWMoff     # se wm non viene riattivata ...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        jmp     .fine           # ... altrimenti metto lo stato a 1, attivo wm e termino
+.s8NolWMoff:
+        movl    $5, -4(%ebp)    # stato
+        jmp     .fine           # imposto lo stato a 5 e termino 
+.stato9:
+        cmpl    $9, -4(%ebp)    # stato
+        jne     .fine           # se stato non è 9 allora termina (non terminerà mai in questo modo poichè stato può solo avere valori tra 0 e 9)
+        cmpl    $0, 20(%ebp)    # count
+        je      .s9notOL        # se il contatore vale 0 allora non si trova più in OL ...
+        cmpl    $6, 20(%ebp)    # count
+        jne     .s9countN6      # se il contatore  non è = 6 ...
+        movl    $0, -4(%ebp)    # stato
+        movl    $0, -8(%ebp)    # int_gen
+        movl    $0, -16(%ebp)   # int_dw
+        jmp     .fine           # ... altrimenti spengo il sistema
+.s9countN6:
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .s9Nres         # se wm non viene riattivato ...
+        cmpl    $5, 20(%ebp)    # count
+        jg      .s9Nres         # se dw non viene riattivato ...
+        movl    $7, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        jmp     .fine           # ... altrimenti metto lo stato a 7, attivo wm e termino
+.s9Nres:
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .fine           # se dw non viene attivato termino subito ...
+        movl    $8, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # ... altrimenti metto lo stato a 8, attivo dw e termino
+.s9notOL:
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .s9WMon         # se wm non viene riattivato ...
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .s9WMon         # se dw non viene riattivato ...
+        movl    $1, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # ... altrimenti riattivo wm e dw, metto lo stato a 1 e termino
+.s9WMon:
+        cmpl    $0, 12(%ebp)    # res_wm
+        je      .s9DWon         # se wm non viene riattivato ...
+        movl    $4, -4(%ebp)    # stato
+        movl    $1, -12(%ebp)   # int_wm
+        jmp     .fine           # ... altrimenti metto lo stato a 4, riattivo wm e termino
+.s9Dwon:
+        cmpl    $0, 16(%ebp)    # res_dw
+        je      .rDWoffrWMoff   # se dw non è stato attivato ...
+        movl    $5, -4(%ebp)    # stato
+        movl    $1, -16(%ebp)   # int_dw
+        jmp     .fine           # ... altrimenti metto lo stato a 5, attivo dw e termino
+.rDWoffrWMoff:
+        movl    $6, -4(%ebp)    # stato
+        jmp     .fine           # metto lo stato a 6 e termino
+.fine:                           
+        nop                     #
+        leave                   #
+        ret                     # ritorno dalla funzione
