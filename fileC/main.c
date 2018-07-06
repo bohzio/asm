@@ -17,13 +17,27 @@ enum { MAXLINES = 400 };
 enum { LIN_LEN = 15 };
 enum { LOUT_LEN = 8 };
 
-int generaFascia(const int bitStato[], int length){
+int generaFascia(int bitStato[], int length, int wm, int dw){
+
+
     int sum = 0;
     int i = 0;
+
+    int oldDw = bitStato[4];
+    int oldWm = bitStato[5];
+
+    //array
+    bitStato[4] = bitStato[4] && dw;
+    bitStato[5] = bitStato[5] && wm;
+
     for (; i < length; i++){
         if(bitStato[i])
             sum += loads[i];
     }
+
+    bitStato[4] = oldDw;
+    bitStato[5] = oldWm;
+
     if (sum <= 1500)
         return 0;
     else if(sum <= 3000)
@@ -77,11 +91,18 @@ int main(int argc, char *argv[]){
 
     char *bufferin = readFile(argc,argv);
 
+    //Ho bisogno di 2 array perchè uno viene modificato con genera fascia
     int bitStato[10];
 
     const int n_input = 15;
 
+    int wm_old = 0;
+    int dw_old = 0;
+
     while (*bufferin != '\0'){
+
+        wm_old = int_wm;
+        dw_old = int_dw;
 
         res_gen = bufferin[0] - '0';
         res_dw = bufferin[1] - '0';
@@ -93,7 +114,11 @@ int main(int argc, char *argv[]){
             bitStato[i] = bufferin[i+4] - '0';
         }
 
-        th = generaFascia(bitStato,10);
+
+        int wm = res_wm || int_wm;
+        int dw = res_dw || int_dw;
+
+        th = generaFascia(bitStato,10,wm,dw);
 
         count = contatore(count, th);
 
@@ -108,8 +133,8 @@ int main(int argc, char *argv[]){
 
             // in assembly devo ritornare lo stato, int_gen, int_wm, int_dw
         }
-        // C e' un particolare B si comporta simile a parte
-        // B e C nell' if
+            // C e' un particolare B si comporta simile a parte
+            // B e C nell' if
         else if (stato == 1) {
             // B NON CAMBIA NIENTE
             // if (count <= 3) i valori li setto solo se cambiano anche in assembly.
@@ -119,7 +144,7 @@ int main(int argc, char *argv[]){
                 int_dw = 0;
             }
         }
-        // D
+            // D
         else if (stato == 2) {
             if (count) {
                 // i valori li setto solo se cambiano anche in assembly. qui dw e' gia' 0 mentre gen = 1
@@ -142,7 +167,7 @@ int main(int argc, char *argv[]){
                 }
             }
         }
-        // E
+            // E
         else if (stato == 3) {
             if (count) {
                 stato = 0;
@@ -172,7 +197,7 @@ int main(int argc, char *argv[]){
             }
 
         }
-        // stato F
+            // stato F
         else if (stato == 4) {
             // passo in I
             if (count) {
@@ -191,7 +216,7 @@ int main(int argc, char *argv[]){
             }
         }
 
-        // stato G
+            // stato G
         else if (stato == 5) {
             if (count) {
                 // L
@@ -210,7 +235,7 @@ int main(int argc, char *argv[]){
             }
         }
 
-        // stato H
+            // stato H
         else if (stato == 6) {
             if (count) {
                 // I
@@ -249,7 +274,7 @@ int main(int argc, char *argv[]){
                 }
             }
         }
-        // stato I
+            // stato I
         else if (stato == 7) {
             if (count) {
                 // C
@@ -316,7 +341,7 @@ int main(int argc, char *argv[]){
                 }
             }
         }
-        // stato M
+            // stato M
         else if (stato == 9) {
             if (count) {
                 // A
@@ -355,6 +380,10 @@ int main(int argc, char *argv[]){
                     stato = 6;
                 }
             }
+        }
+
+        if(wm_old != int_wm || dw_old != int_dw){
+            th = generaFascia(bitStato,10,int_wm,int_dw);
         }
 
         if(int_gen != 0){
