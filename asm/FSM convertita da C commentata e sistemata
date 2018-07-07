@@ -31,11 +31,11 @@ fsm:
         je      .dwON           # 
         movl    $0, -12(%ebp)   # int_wm
         cmpl    $0, 16(%ebp)    # res_dw
-        je      .L9             #
+        je      .s2DWoff        #
         movl    $8, -4(%ebp)    # stato
         movl    $1, -16(%ebp)   # int_dw
         jmp     .fine           #
-.L9:
+.s2DWoff:
         movl    $3, -4(%ebp)    # stato
         jmp     .fine           #
 .dwON:
