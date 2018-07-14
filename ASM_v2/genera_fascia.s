@@ -7,7 +7,7 @@ genera_fascia:
    	 subl %ebx, %ebx  				#azzero ebx ad ogni nuova riga di input
    	 
    	            					#nel registro esi si ha il puntatore al primo carattere di ogni riga
-	 load1:
+     load1:
 		 cmpb $49, 4(%esi)			#se load1 è uguale a 1 (carattere ASCII 49) continuo il "blocco di istruzioni" altrimenti passo ad occuparmi del load successivo
 		 jne load2
 		 addl $2000, %ebx			#in ebx salvo la somma dei load
