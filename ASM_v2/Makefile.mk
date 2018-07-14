@@ -1,6 +1,6 @@
 COMPILATORE= gcc-5 -m32
-CODICE= controller.c genera_fascia.s
-OGGETTO= controller.o genera_fascia.o
+CODICE= controller.c genera_fascia.s contatore.s
+OGGETTO= controller.o genera_fascia.o contatore.o
 DEBUG= -g
 ESEGUIBILE= controller
 
