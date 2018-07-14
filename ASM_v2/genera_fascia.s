@@ -89,9 +89,9 @@ genera_fascia:
      
      prima_fascia:
      								#Altrimenti scrivo "F1\n" e termino
-     	 movb $70, 4(%edi)
-     	 movb $49, 5(%edi)
-     	 movb $10, 6(%edi)
+     	 	movb $70, 4(%edi)
+     	 	movb $49, 5(%edi)
+     	 	movb $10, 6(%edi)
 
-	 fine_genera_fascia:
-	 	 ret
+     fine_genera_fascia:
+	 	ret
