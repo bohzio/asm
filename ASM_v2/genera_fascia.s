@@ -4,7 +4,7 @@
 
 genera_fascia:
 							
-   	 subl %ebx, %ebx  				#azzero ebx ad ogni nuova riga di input
+     subl %ebx, %ebx  					#azzero ebx ad ogni nuova riga di input
    	 
    	            					#nel registro esi si ha il puntatore al primo carattere di ogni riga
      load1:
