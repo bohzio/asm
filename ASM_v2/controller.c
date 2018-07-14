@@ -88,7 +88,10 @@ int main(int argc, char *argv[]) {
     Inserite qui il vostro blocco di codice assembly inline o richiamo a funzioni assembly.
     Il blocco di codice prende come input 'bufferin' e deve restituire una variabile stringa 'bufferout_asm' che verrà poi salvata su file. */
 		
-	/*CORDINATE DEI VARI INPUT OUTPUT E FUNZIONE REGISTRI:
+	/*
+	
+	CORDINATE DEI VARI INPUT OUTPUT E FUNZIONE REGISTRI:
+	
 	eax = contatore
 	ebx = tiene la somma dei load per ogni riga
 	esi = puntatore per la stringa bufferin.
@@ -119,24 +122,22 @@ int main(int argc, char *argv[]) {
 	5(edi) = caratterefascia(2)
 	6(edi) = "\n"
 	
-	
-	
 	*/
 		__asm__(
 		
 		"Start:"
-		"cmpb $0, (%%esi);"		//Se trovo '\0'(ASCII) allora ho finito di leggere le righe del file di input e termino
-		"je Fine_input;"
-		"movb $49, (%%edi);"	//Qui va modificato il codice per gestire interruttori etc. Per ora restituisce sempre gli int accesi     
-    	"movb $49, 1(%%edi);"
-    	"movb $49, 2(%%edi);"
-    	"movb $45, 3(%%edi);"   //Questo è il carattere '-'
-    	"call genera_fascia;"
-    	"addl $15, %%esi;"
-    	"addl $7, %%edi;"
-    	"jmp Start;"
+			"cmpb $0, (%%esi);"		//Se trovo '\0'(ASCII) allora ho finito di leggere le righe del file di input e termino
+			"je Fine_input;"
+			"movb $49, (%%edi);"	//Qui va modificato il codice per gestire interruttori etc. Per ora restituisce sempre gli int accesi     
+    			"movb $49, 1(%%edi);"
+    			"movb $49, 2(%%edi);"
+    			"movb $45, 3(%%edi);"   //Questo è il carattere '-'
+    			"call genera_fascia;"
+    			"addl $15, %%esi;"
+    			"addl $7, %%edi;"
+    			"jmp Start;"
 		"Fine_input:"			//Una volta terminata la stringa si esce dal programma
-		"movb $0, (%%edi);"		//Metto il carattere per terminare la stringa
+			"movb $0, (%%edi);"		//Metto il carattere per terminare la stringa
 			:
 			:"D" (bufferout_asm), "S" (bufferin)
 			:
