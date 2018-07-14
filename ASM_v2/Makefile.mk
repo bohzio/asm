@@ -1,4 +1,4 @@
-COMPILATORE= gcc -m32
+COMPILATORE= gcc-5 -m32
 CODICE= controller.c genera_fascia.s
 OGGETTO= controller.o genera_fascia.o
 DEBUG= -g

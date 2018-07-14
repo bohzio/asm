@@ -94,6 +94,8 @@ int main(int argc, char *argv[]) {
 	
 	eax = contatore
 	ebx = tiene la somma dei load per ogni riga
+    cl = dw
+    dl = wm
 	esi = puntatore per la stringa bufferin.
 	edi = puntatore per la stringa bufferout_asm. Per scrivere basta vare movb $(codice ascii), spiaz(%edi)
 	
@@ -124,19 +126,28 @@ int main(int argc, char *argv[]) {
 	Edi va incrementato di 7 per ogni riga successiva
 	
 	*/
+    /*
+    48 = '0'
+    48 = '1'
+
+    */
 		__asm__(
-		
+		"movb $48, (%%edi);"		//Qui va modificato il codice per gestire interruttori etc. Per ora restituisce sempre gli int accesi
+        "movb $48, 1(%%edi);"
+        "movb $48, 2(%%edi);"
+        ""
 		"Start:"
 			"cmpb $0, (%%esi);"		//Se trovo '\0'(ASCII) allora ho finito di leggere le righe del file di input e termino
 			"je Fine_input;"
-			"movb $49, (%%edi);"		//Qui va modificato il codice per gestire interruttori etc. Per ora restituisce sempre gli int accesi     
-    			"movb $49, 1(%%edi);"
-    			"movb $49, 2(%%edi);"
-    			"movb $45, 3(%%edi);"   	//Questo è il carattere '-'
-    			"call genera_fascia;"
-    			"addl $15, %%esi;"
-    			"addl $7, %%edi;"
-    			"jmp Start;"
+            "movb 1(%%edi), %%cl;"  // recupero il vecchi int_dw
+            "movb 2(%%edi), %%dl;"  // recupero il vecchi int_wm
+            "orb 1(%%esi), %%cl;"   //res_dw || int_dw
+            "orb 2(%%esi), %%dl;"   //res_wm || int_wm
+    		"call genera_fascia;"
+            "movb $45, 3(%%edi);"   	//Questo è il carattere '-'
+    		"addl $15, %%esi;"
+    		"addl $7, %%edi;"
+    		"jmp Start;"
 		"Fine_input:"				//Una volta terminata la stringa si esce dal programma
 			"movb $0, (%%edi);"		//Metto il carattere per terminare la stringa
 			:
