@@ -131,10 +131,13 @@ int main(int argc, char *argv[]) {
     49 = '1'
     */
 		__asm__(
+        
+
 		"Start:"
             "movb $48, (%%edi);"
             "movb $48, 1(%%edi);"
             "movb $48, 2(%%edi);"
+        "Ciclo:"
 			"cmpb $0, (%%esi);"		//Se trovo '\0'(ASCII) allora ho finito di leggere le righe del file di input e termino
 			"je FineInput;"
             "movb 1(%%edi), %%cl;"  // recupero il vecchi int_dw
@@ -183,7 +186,7 @@ int main(int argc, char *argv[]) {
             "movb $45, 3(%%edi);"   	//Questo è il carattere '-'
     		"addl $15, %%esi;"
     		"addl $7, %%edi;"
-    		"jmp Start;"
+    		"jmp Ciclo;"
 		"FineInput:"				//Una volta terminata la stringa si esce dal programma
 			"movb $0, (%%edi);"		//Metto il carattere per terminare la stringa
 			:
