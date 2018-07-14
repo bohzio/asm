@@ -3,9 +3,24 @@
 .type genera_fascia, @function
 
 genera_fascia:
-							
-     subl %ebx, %ebx  					#azzero ebx ad ogni nuova riga di input
-   	 
+
+	 pushl %ebp 
+	 movl %esp, %ebp
+
+	 pushl %eax
+					
+     subl %ebx, %ebx  				#azzero ebx ad ogni nuova riga di input
+	 subl %eax, %eax
+
+
+	 save_old_dw_wm:
+	 	movb 8(%esi), %al			#salvo DW
+		movb 9(%esi), %ah   		#salvo WM
+
+	 replace_dw_wm_loads:
+	 	andb %cl, 8(%esi)           #metto nel load DW l'and tra il load e int_dw 
+		andb %dl, 9(%esi)		   #metto nel load WM l'and tra il load e int_wm
+
    	            					#nel registro esi si ha il puntatore al primo carattere di ogni riga
      load1:
 		 cmpb $49, 4(%esi)			#se load1 è uguale a 1 (carattere ASCII 49) continuo il "blocco di istruzioni" altrimenti passo ad occuparmi del load successivo
@@ -56,6 +71,10 @@ genera_fascia:
 		 cmpb $49, 13(%esi)
 		 jne fine_somma
 		 addl $300, %ebx
+
+	restore_old_dw_wm:
+	 	movb %al, 8(%esi) 			#ripristino il load DW iniziale
+		movb %ah, 9(%esi)   		#ripristino il load WM iniziale
     
      fine_somma:					#A questo punto ho finito di sommare i load
 		 
@@ -94,4 +113,9 @@ genera_fascia:
      	 	movb $10, 6(%edi)
 
      fine_genera_fascia:
+
+	 	popl %eax
+	
+		popl %ebp
+
 	 	ret

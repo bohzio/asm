@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
 	*/
     /*
     48 = '0'
-    48 = '1'
+    49 = '1'
 
     */
 		__asm__(
