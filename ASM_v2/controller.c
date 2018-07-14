@@ -121,6 +121,7 @@ int main(int argc, char *argv[]) {
 	4(edi) = caratterefascia(1)
 	5(edi) = caratterefascia(2)
 	6(edi) = "\n"
+	Edi va incrementato di 7 per ogni riga successiva
 	
 	*/
 		__asm__(
