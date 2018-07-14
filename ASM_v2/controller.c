@@ -128,27 +128,62 @@ int main(int argc, char *argv[]) {
 	*/
     /*
     48 = '0'
-    48 = '1'
-
+    49 = '1'
     */
 		__asm__(
-		"movb $48, (%%edi);"		//Qui va modificato il codice per gestire interruttori etc. Per ora restituisce sempre gli int accesi
+		"movb $48, (%%edi);"
         "movb $48, 1(%%edi);"
         "movb $48, 2(%%edi);"
-        ""
 		"Start:"
 			"cmpb $0, (%%esi);"		//Se trovo '\0'(ASCII) allora ho finito di leggere le righe del file di input e termino
-			"je Fine_input;"
+			"je FineInput;"
             "movb 1(%%edi), %%cl;"  // recupero il vecchi int_dw
             "movb 2(%%edi), %%dl;"  // recupero il vecchi int_wm
-            "orb 1(%%esi), %%cl;"   //res_dw || int_dw
-            "orb 2(%%esi), %%dl;"   //res_wm || int_wm
+            "or 1(%%esi), %%cl;"   //res_dw || int_dw
+            "or 2(%%esi), %%dl;"   //res_wm || int_wm
     		"call genera_fascia;"
+        "ControlloGEN:"             // doppio controllo if (int_gen == 0 && res_gen)
+            "cmpb $48, (%%edi);"
+            "jne ControlloDW;"
+            "cmpb $49, (%%esi);"
+            "jne ControlloDW;"
+            "movb $49, (%%edi);"
+            "movb $49, 1(%%edi);"
+            "movb $49, 2(%%edi);"
+        "ControlloDW:"
+            "cmpb $48, 1(%%edi);"
+            "jne ControlloWM;"
+            "movb 1(%%esi), %%ch;"
+            "movb %%ch, 1(%%edi);"
+        "ControlloWM:"
+            "cmpb $48, 2(%%edi);"
+            "jne ControlloCiclo4;"
+            "movb 2(%%esi), %%dh;"
+            "movb %%dh, 2(%%edi);"
+            "jmp ControlloCiclo4;"
+        "ControlloCiclo4:"
+            "cmpl $4, %%eax;"
+            "jne ControlloCiclo5;"
+            "movb $48, 1(%%edi);"
+            "jmp FineControllo;"
+        "ControlloCiclo5:"
+            "cmpl $5, %%eax;"
+            "jne ControlloCiclo6;"
+            "movb $48, 2(%%edi);"
+            "jmp FineControllo;"
+        "ControlloCiclo6:"
+            "cmpl $6, %%eax;"
+            "jne FineControllo;"
+            "movb $48, 0(%%edi);"
+            "movb $48, 1(%%edi);"
+            "movb $48, 2(%%edi);"
+            "jmp FineControllo;"
+        "FineControllo:"                // fine controllo
             "movb $45, 3(%%edi);"   	//Questo è il carattere '-'
     		"addl $15, %%esi;"
     		"addl $7, %%edi;"
     		"jmp Start;"
-		"Fine_input:"				//Una volta terminata la stringa si esce dal programma
+		"FineInput:"				//Una volta terminata la stringa si esce dal programma
 			"movb $0, (%%edi);"		//Metto il carattere per terminare la stringa
 			:
 			:"D" (bufferout_asm), "S" (bufferin)
