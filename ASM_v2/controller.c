@@ -163,7 +163,6 @@ int main(int argc, char *argv[]) {
             "jne ControlloCiclo4;"
             "movb 2(%%esi), %%dh;"
             "movb %%dh, 2(%%edi);"
-            "jmp ControlloCiclo4;"
         "ControlloCiclo4:"
             "cmpl $4, %%eax;"
             "jne ControlloCiclo5;"
@@ -180,7 +179,6 @@ int main(int argc, char *argv[]) {
             "movb $48, (%%edi);"
             "movb $48, 1(%%edi);"
             "movb $48, 2(%%edi);"
-            "jmp ControlloRicalcolaTH;"
         "ControlloRicalcolaTH:"
             "cmpb 1(%%edi), %%cl;"      //dw_old != int_dw
             "jne RicalcolaTH;"
@@ -188,16 +186,14 @@ int main(int argc, char *argv[]) {
             "jne RicalcolaTH;"
             "jmp ControlloIntGen;"
         "RicalcolaTH:"
-            "movb 1(%%edi), %%cl;"  // recupero il vecchi int_dw
-            "movb 2(%%edi), %%dl;"  // recupero il vecchi int_wm
+            "movb 1(%%edi), %%cl;"      // piazzo in cl il nuovo int_dw
+            "movb 2(%%edi), %%dl;"      // piazzo in dl il nuovo int_wm
             "call genera_fascia;"
-            "jmp ControlloIntGen;"
         "ControlloIntGen:"
             "cmpb $48, (%%edi);"
             "jne FineControllo;"        //int_gen == 0 allora TH = 00
             "movb $48, 4(%%edi);"
             "movb $48, 5(%%edi);"
-            "jmp FineControllo;"
         "FineControllo:"                //Fine controllo
             "movb $45, 3(%%edi);"   	//Questo è il carattere '-'
     		"addl $15, %%esi;"
