@@ -19,7 +19,7 @@ genera_fascia:
 
 	 replace_dw_wm_loads:
 	 	andb %cl, 8(%esi)           #metto nel load DW l'and tra il load e int_dw 
-		andb %dl, 9(%esi)		   #metto nel load WM l'and tra il load e int_wm
+		andb %dl, 9(%esi)		   	#metto nel load WM l'and tra il load e int_wm
 
    	            					#nel registro esi si ha il puntatore al primo carattere di ogni riga
      load1:

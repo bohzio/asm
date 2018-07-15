@@ -188,6 +188,8 @@ int main(int argc, char *argv[]) {
             "jne RicalcolaTH;"
             "jmp ControlloIntGen;"
         "RicalcolaTH:"
+            "movb 1(%%edi), %%cl;"  // recupero il vecchi int_dw
+            "movb 2(%%edi), %%dl;"  // recupero il vecchi int_wm
             "call genera_fascia;"
             "jmp ControlloIntGen;"
         "ControlloIntGen:"
