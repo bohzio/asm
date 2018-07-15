@@ -132,15 +132,28 @@ int main(int argc, char *argv[]) {
     */
 		__asm__(
         
-
+        "movb $0, %%dh;"
 		"Start:"
             "movb $48, (%%edi);"
             "movb $48, 1(%%edi);"
             "movb $48, 2(%%edi);"
 			"cmpb $0, (%%esi);"		//Se trovo '\0'(ASCII) allora ho finito di leggere le righe del file di input e termino
 			"je FineInput;"
+            "cmpb $0, %%dh;"
+            "je SETTO_INT_INIZIALI_0;"
+            "subl $7, %%edi;"
             "movb 1(%%edi), %%cl;"  // recupero il vecchi int_dw
             "movb 2(%%edi), %%dl;"  // recupero il vecchi int_wm
+            "addl $7, %%edi;"
+            "jmp END_SETTO_INT_INIZIALI_0;"
+        "SETTO_INT_INIZIALI_0:"
+            "movb $48, (%%edi);"
+            "movb $48, 1(%%edi);"
+            "movb $48, 2(%%edi);"
+            "movb 1(%%edi), %%cl;"  // setto cl a 0 --> int_dw_old = 0
+            "movb 2(%%edi), %%dl;"  // setto dl a 0 --> int_wm_old = 0
+
+        "END_SETTO_INT_INIZIALI_0:"
             "or 1(%%esi), %%cl;"    //res_dw || int_dw
             "or 2(%%esi), %%dl;"    //res_wm || int_wm
             "call contatore;"
@@ -198,6 +211,7 @@ int main(int argc, char *argv[]) {
             "movb $45, 3(%%edi);"   	//Questo è il carattere '-'
     		"addl $15, %%esi;"
     		"addl $7, %%edi;"
+            "movb $1, %%dh;"
     		"jmp Start;"
 		"FineInput:"				    //Una volta terminata la stringa si esce dal programma
 			"movb $0, (%%edi);"		    //Metto il carattere per terminare la stringa
