@@ -131,7 +131,6 @@ int main(int argc, char *argv[]) {
     49 = '1'
     */
 		__asm__(
-        
         "movb $0, %%dh;"
 		"Start:"
             "movb $48, (%%edi);"
