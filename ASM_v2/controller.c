@@ -131,16 +131,18 @@ int main(int argc, char *argv[]) {
     49 = '1'
     */
 		__asm__(
-		"movb $48, (%%edi);"
-        "movb $48, 1(%%edi);"
-        "movb $48, 2(%%edi);"
 		"Start:"
+            "movb $48, (%%edi);"
+            "movb $48, 1(%%edi);"
+            "movb $48, 2(%%edi);"
+
 			"cmpb $0, (%%esi);"		//Se trovo '\0'(ASCII) allora ho finito di leggere le righe del file di input e termino
 			"je FineInput;"
             "movb 1(%%edi), %%cl;"  // recupero il vecchi int_dw
             "movb 2(%%edi), %%dl;"  // recupero il vecchi int_wm
             "or 1(%%esi), %%cl;"   //res_dw || int_dw
             "or 2(%%esi), %%dl;"   //res_wm || int_wm
+            "call contatore;"
     		"call genera_fascia;"
         "ControlloGEN:"             // doppio controllo if (int_gen == 0 && res_gen)
             "cmpb $48, (%%edi);"

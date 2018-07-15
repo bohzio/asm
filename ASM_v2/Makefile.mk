@@ -1,6 +1,6 @@
 COMPILATORE= gcc-5 -m32
-CODICE= controller.c genera_fascia.s
-OGGETTO= controller.o genera_fascia.o
+CODICE= controller.c genera_fascia.s contatore.s
+OGGETTO= controller.o genera_fascia.o contatore.o
 DEBUG= -g
 ESEGUIBILE= controller
 
@@ -11,6 +11,7 @@ $(ESEGUIBILE): $(OGGETTO)
 $(OGGETTO): $(CODICE)
 	$(COMPILATORE) -c controller.c -o controller.o
 	$(COMPILATORE) -c genera_fascia.s -o genera_fascia.o
+	$(COMPILATORE) -c contatore.s -o contatore.o
 clean:
 	rm -f $(ESEGUIBILE) core
 
