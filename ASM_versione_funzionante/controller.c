@@ -123,9 +123,9 @@ int main(int argc, char *argv[]) {
 	*/
 		__asm__(
 		
-		"subl %%eax, %%eax;"			//Svuoto eax per pulirlo da possibile memoria sporca.
+		"movl $0, %%eax;"				//azzero il contatore
 		"jmp FINCHE_SPENTA;"
-		"MACCHINA_SPENTA:"					//questo blocco di codice stampa 000-00\n se res_gen non è stato attivato / si è arrivati al sesto ciclo in OL
+		"MACCHINA_SPENTA:"				//questo blocco di codice stampa 000-00\n se res_gen non è stato attivato / si è arrivati al sesto ciclo in OL
 			"subl %%eax, %%eax;"
 			"movb $48, (%%edi);"
 			"movb $48, 1(%%edi);"
@@ -162,6 +162,9 @@ int main(int argc, char *argv[]) {
 			"movb -5(%%edi), %%cl;"
 			"movb %%cl, 2(%%edi);"		//int_wm
 			"movb $45, 3(%%edi);"   	//Questo è il carattere '-'
+		
+		// ##################__Settaggio degli int solo quando i res (anche 1) sono a 1___##################
+
 		"CONTROLLO_RES_DW:"
 			"cmpb $49, 1(%%esi);"		//Se il res di dw è uguale a 1 allora metto a uno int_dw
 			"jne CONTROLLO_RES_WM;"		
@@ -170,6 +173,9 @@ int main(int argc, char *argv[]) {
 			"cmpb $49, 2(%%esi);"		//Se il res di wm è uguale a 1 allora metto a uno int_wm
 			"jne FINE_CONTROLLO_RES_WM;"
 			"movb $49, 2(%%esi);"
+		// #################################################################################################
+
+		// ##################################__Controllo sul ciclo di OL___#################################
 		"FINE_CONTROLLO_RES_WM:"
 			"call genera_fascia;"		//Calcolo la fascia in base agli int precedenti combinati con i res attuali
 			"cmpb $76, 5(%%edi);"		//Se sono in OL allora inizio una serie di check per sapere a che punto si trova il contatore
@@ -178,30 +184,33 @@ int main(int argc, char *argv[]) {
 			"jl INCREMENTA_CONTATORE;"	//Se <3 allora salta alla prossima riga con contatore incrementato
 			"jne CICLO_5_OL;"			//Se non uguale (quindi >3) controllo se = 4
 			"movb $48, 1(%%edi);"		//Altrimenti metto a 0 int_dw e ricalcolo la fascia
-			"call genera_fascia;"
-			"cmpb $76, 5(%%edi);"		//Se la fascia ricalcolata è ancora OL allora passo a INCREMENTA_CONTATORE
-			"jne FINE_CICLO_NON_OL;"	//Altrimenti vado a FINE_CICLO_NON_OL
-			"jmp INCREMENTA_CONTATORE;"
+			"jmp RICALCOLA_FASCIA;"
 		"CICLO_5_OL:"
 			"cmp $4, %%eax;"		
 			"jne CICLO_6_OL;"			//Se non uguale a 5 controllo se = 6
 			"movb $48, 2(%%edi);"		//Altrimenti metto a 0 int_wm e ricalcolo la fascia
-			"call genera_fascia;"
-			"cmpb $76, 5(%%edi);"		//Se la fascia ricalcolata è ancora OL allora passo a INCREMENTA_CONTATORE
-			"jne FINE_CICLO_NON_OL;"	//Altrimenti vado a FINE_CICLO_NON_OL
-			"jmp INCREMENTA_CONTATORE;"
+			"jmp RICALCOLA_FASCIA;"
 		"CICLO_6_OL:"
 			"cmp $5, %%eax;"
 			"je MACCHINA_SPENTA;"
+		// #################################################################################################
+		"RICALCOLA_FASCIA:"
+			"call genera_fascia;"
+			"cmpb $76, 5(%%edi);"		//Se la fascia ricalcolata è ancora OL allora passo a INCREMENTA_CONTATORE
+			"je INCREMENTA_CONTATORE;"	//Altrimenti vado a FINE_CICLO_NON_OL
+		// #################################################################################################
 		"FINE_CICLO_NON_OL:"
-			"subl %%eax, %%eax;"		//azzero il contatore
+			"movl $0, %%eax;"			//azzero il contatore
 			"jmp NUOVA_RIGA_FILE;"
+		// #################################################################################################
 		"INCREMENTA_CONTATORE:"
 			"addl $1, %%eax;"
+		// #################################################################################################
 		"NUOVA_RIGA_FILE:"	
 			"addl $15, %%esi;"			//passo alla riga successiva
 			"addl $7, %%edi;"
 			"jmp CICLO_MACCHINA_ACCESA;"
+		// #################################################################################################
 		"FINE_INPUT:"					//Una volta terminata la stringa si esce dal programma
 			"movb $0, (%%edi);"			//Metto il carattere per terminare la stringa
 			:

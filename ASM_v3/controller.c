@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
 			"call genera_fascia;"		//Calcolo la fascia in base agli int precedenti combinati con i res attuali
 			"cmpb $76, 5(%%edi);"		//Se sono in Ol allora inizio una serie di check per sapere a che punto si trova il contatore
 			"jne fine_ciclo_not_OL;"	//Altrimenti vado a fine ciclo not ol dove azzero il contatore e passo alla riga successiva
-				"cmp $4, %%eax;"		//Controlle se contatore = 4
+				"cmp $3, %%eax;"		//Controlle se contatore = 4
 				"jl next_line_OL;"		//Se <4 allora salta alla prossima riga con contatore incrementato
 				"jne ciclo_5_OL;"		//Se non uguale (quindi >4) controllo se = 5
 				"movb $48, 1(%%edi);"	//Altrimenti metto a 0 int_dw e ricalcolo la fascia
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
 				"jne fine_ciclo_not_OL;"//Altrimenti vado a fine_ciclo_not_OL
 				"jmp next_line_OL;"
 			"ciclo_5_OL:"
-				"cmp $5, %%eax;"		
+				"cmp $4, %%eax;"		
 				"jne ciclo_6_OL;"		//Se non uguale a 5 controllo se = 6
 				"movb $48, 2(%%edi);"	//Altrimenti metto a 0 int_wm e ricalcolo la fascia
 				"call genera_fascia;"
@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
 				"jne fine_ciclo_not_OL;"//Altrimenti vado a fine_ciclo_not_OL
 				"jmp next_line_OL;"
 			"ciclo_6_OL:"
-				"cmp $6, %%eax;"
+				"cmp $5, %%eax;"
 				"je AncoraSpento;"
 		"fine_ciclo_not_OL:"
 			"subl %%eax, %%eax;"		//azzero il contatore
@@ -205,7 +205,6 @@ int main(int argc, char *argv[]) {
 			:
 			:"D" (bufferout_asm), "S" (bufferin)
 			:
-			
 		);
 		
 

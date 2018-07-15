@@ -1,103 +1,99 @@
+.section .data
+.section .bss
 .section .text
 .global genera_fascia
 .type genera_fascia, @function
 
 genera_fascia:
-							
-   	 subl %ebx, %ebx  				#azzero ebx ad ogni nuova riga di input
-   	 
-   	            					#nel registro esi si ha il puntatore al primo carattere di ogni riga
-	 load1:
-		 cmpb $49, 4(%esi)			#se load1 è uguale a 1 (carattere ASCII 49) continuo il "blocco di istruzioni" altrimenti passo ad occuparmi del load successivo
-		 jne load2
-		 addl $2000, %ebx			#in ebx salvo la somma dei load
+    pushl %ebp  					#Salvo il frame pointer
+    movl %esp, %ebp					#Il nuovo frame pointer lo faccio puntare alla cima della pila
+   	movl $0, %ebx  					#Azzero ebx ad ogni nuova riga di input
+   	            					#Nel registro esi si ha il puntatore al primo carattere di ogni riga
+	LOAD1:
+		cmpb $49, 4(%esi)			#Se LOAD1 è uguale a 1 (carattere ASCII 49) continuo il "blocco di istruzioni" altrimenti passo ad occuparmi del LOAD successivo
+		jne LOAD2
+		addl $2000, %ebx			#In ebx salvo la somma dei LOAD
      
-     load2:
-		 cmpb $49, 5(%esi)
-		 jne load3
-		 addl $300, %ebx
+    LOAD2:
+		cmpb $49, 5(%esi)
+		jne LOAD3
+		addl $300, %ebx
     
-     load3:
-		 cmpb $49, 6(%esi)
-		 jne load4
-		 addl $1200, %ebx    
-     
-     load4:
-		 cmpb $49, 7(%esi)
-		 jne load5
-		 addl $1000, %ebx
-     
-     load5:							#Lavastoviglie (DW)
-		 cmpb $49, 8(%esi)
-		 jne load6
-		 addl $2000, %ebx
-		 cmpb $48, 1(%edi)
-		 jne load6
-		 subl $2000, %ebx
-     
-     load6:							#Lavatrice (WM)
-		 cmpb $49, 9(%esi)
-		 jne load7
-		 addl $1800, %ebx
-		 cmpb $48, 2(%edi)
-		 jne load7
-		 subl $1800, %ebx
-     
-     load7:
-		 cmpb $49, 10(%esi)
-		 jne load8
-		 addl $240, %ebx
-     
-     load8:
-		 cmpb $49, 11(%esi)
-		 jne load9
-		 addl $400, %ebx
+    LOAD3:
+		cmpb $49, 6(%esi)
+		jne LOAD4
+		addl $1200, %ebx    
     
-     load9:
-		 cmpb $49, 12(%esi)
-		 jne load10
-		 addl $200, %ebx
-    
-     load10:
-		 cmpb $49, 13(%esi)
-		 jne fine_calcolo
-		 addl $300, %ebx
-    
-     fine_calcolo:					#A questo punto ho finito di sommare i load
-		 
-		 cmpl $4500, %ebx
-		 jle terza_fascia
-		 							#Se >4500 scrivo "OL\n" e termino
-		 movb $79, 4(%edi)
-		 movb $76, 5(%edi)
-		 movb $10, 6(%edi)
-		 jmp fine_genera_fascia
-     
-     terza_fascia:
-		 
-		 cmpl $3000, %ebx
-		 jle seconda_fascia
-		 							#Se >3000 scrivo "F3\n" e termino
-		 movb $70, 4(%edi)
-		 movb $51, 5(%edi)
-		 movb $10, 6(%edi)
-		 jmp fine_genera_fascia
-     
-     seconda_fascia:
-		 
-		 cmpl $1500, %ebx
-		 jle prima_fascia
-		 							#Se >1500 scrivo "F2\n" e termino
-		 movb $70, 4(%edi)
-		 movb $50, 5(%edi)
-		 movb $10, 6(%edi)
-		 jmp fine_genera_fascia
-     
-     prima_fascia:
-     								#Altrimenti scrivo "F1\n" e termino
-     	 movb $70, 4(%edi)
-     	 movb $49, 5(%edi)
-     	 movb $10, 6(%edi)
+    LOAD4:
+		cmpb $49, 7(%esi)
+		jne LOAD5
+	 	addl $1000, %ebx
 
-	 fine_genera_fascia:
-	 	 ret
+    LOAD5:							#Lavastoviglie (DW)
+		cmpb $49, 8(%esi)
+		jne LOAD6
+		addl $2000, %ebx
+	 	cmpb $48, 1(%edi)
+		jne LOAD6
+		subl $2000, %ebx
+    
+	LOAD6:							#Lavatrice (WM)
+		cmpb $49, 9(%esi)
+		jne LOAD7
+		addl $1800, %ebx
+		cmpb $48, 2(%edi)
+		jne LOAD7
+		subl $1800, %ebx
+    LOAD7:
+		cmpb $49, 10(%esi)
+		jne LOAD8
+		addl $240, %ebx
+     
+	LOAD8:
+		
+		cmpb $49, 11(%esi)
+		jne LOAD9
+		addl $400, %ebx
+
+    LOAD9:
+		cmpb $49, 12(%esi)
+		jne LOAD10
+		addl $200, %ebx
+    
+	LOAD10:
+		cmpb $49, 13(%esi)
+		jne FINE_SOMMA
+		addl $300, %ebx
+    
+	FINE_SOMMA:					#A questo punto ho finito di sommare i LOAD	 
+		cmpl $4500, %ebx
+		jle TERZA_FASCIA
+	
+	CONTROLLO_OL:				#Se >4500 scrivo "OL\n" e termino
+		movb $79, 4(%edi)		
+		movb $76, 5(%edi)
+		movb $10, 6(%edi)
+		jmp FINE_GENERA_FASCIA
+    
+	TERZA_FASCIA:				#Se >3000 scrivo "F3\n" e termino
+		cmpl $3000, %ebx
+		jle SECONDA_FASCIA
+		movb $70, 4(%edi)
+		movb $51, 5(%edi)
+		jmp FINE_GENERA_FASCIA
+
+    SECONDA_FASCIA:				#Se >1500 scrivo "F2\n" e termino
+		cmpl $1500, %ebx
+		jle PRIMA_FASCIA
+		movb $70, 4(%edi)
+		movb $50, 5(%edi)
+		jmp FINE_GENERA_FASCIA
+    
+    PRIMA_FASCIA:				#Altrimenti scrivo "F1\n" e termino
+     	movb $70, 4(%edi)
+     	movb $49, 5(%edi)
+
+	FINE_GENERA_FASCIA:
+		movb $10, 6(%edi)		#Aggiungo \n in fondo visto che e' comune a tutti
+		popl %ebp				#Ripristino il frame pointer salvato sullo stack
+	 	ret
