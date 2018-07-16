@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
 			"movb $45, 3(%%edi);"   	//Questo è il carattere '-'
 			"movb $48, 4(%%edi);"
 			"movb $48, 5(%%edi);"
-			"movb $10, 6(%%edi);"		//Questo è il carattere '-'
+			"movb $10, 6(%%edi);"		//Questo è il carattere '\n'
 			"addl $15, %%esi;"
 			"addl $7, %%edi;"
 	
