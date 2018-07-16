@@ -72,7 +72,6 @@ genera_fascia:
 	CONTROLLO_OL:				#Se >4500 scrivo "OL\n" e termino
 		movb $79, 4(%edi)		
 		movb $76, 5(%edi)
-		movb $10, 6(%edi)
 		jmp FINE_GENERA_FASCIA
     
 	TERZA_FASCIA:				#Se >3000 scrivo "F3\n" e termino
